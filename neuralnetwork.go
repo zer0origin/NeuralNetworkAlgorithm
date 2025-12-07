@@ -54,7 +54,7 @@ func (a Matrix) GetMatrixColumnAsMatrix(column uint32) Matrix {
 	return resultArr
 }
 
-func (a Matrix) DotProduct(b Matrix) (Matrix, error) {
+func (a Matrix) Multiply(b Matrix) (Matrix, error) {
 	rowsInA := len(a)
 	columnInA := len(a[0])
 	columnInB := len(b[0])
@@ -81,19 +81,64 @@ func (a Matrix) DotProduct(b Matrix) (Matrix, error) {
 	return result, nil
 }
 
-func (a Matrix) ApplyFunc(toApply func(float64) float64) {
+func (a Matrix) SumRows() Matrix {
+	rowsInA := len(a)
+	columnInA := len(a[0])
+
+	result := NewMatrix(uint32(rowsInA), 1)
+
+	for r := range rowsInA {
+		for c := range columnInA {
+			result[r][0] += a[r][c]
+		}
+	}
+
+	return result
+}
+
+func (a Matrix) ApplyFunc(toApply func(float64) float64) Matrix {
 	rowsOfA := len(a)
 	colOfA := len(a[0])
 
+	result := NewMatrix(uint32(rowsOfA), uint32(colOfA))
+
 	for r := range rowsOfA {
 		for c := range colOfA {
-			a[r][c] = toApply(a[r][c])
+			result[r][c] = toApply(a[r][c])
 		}
 	}
+
+	return result
+}
+
+func (a Matrix) ApplyWithIndexes(toApply func(value float64, rows int, columns int) float64) Matrix {
+	rowsOfA := len(a)
+	colOfA := len(a[0])
+
+	result := NewMatrix(uint32(rowsOfA), uint32(colOfA))
+
+	for r := range rowsOfA {
+		for c := range colOfA {
+			result[r][c] = toApply(a[r][c], r, c)
+		}
+	}
+
+	return result
 }
 
 func Sigmoid(x float64) float64 {
 	return 1 / (1 + math.Pow(math.E, -x))
+}
+
+func (a Matrix) Transpose() Matrix {
+	colsOfA := len(a[0])
+	result := make([][]float64, colsOfA)
+
+	for c := range colsOfA {
+		result[c] = a.GetMatrixColumn(uint32(c))
+	}
+
+	return NewMatrixFromValues(result...)
 }
 
 //https://www.jeremyjordan.me/intro-to-neural-networks/
