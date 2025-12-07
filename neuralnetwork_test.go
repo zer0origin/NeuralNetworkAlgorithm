@@ -9,29 +9,8 @@ import (
 )
 
 func TestMatrixProduct(t *testing.T) {
-	matrixA := NewMatrix(2, 3)
-	rowZero := matrixA.GetMatrixRow(0)
-	rowZero[0] = 1
-	rowZero[1] = 2
-	rowZero[2] = 3
-
-	rowOne := matrixA.GetMatrixRow(1)
-	rowOne[0] = 4
-	rowOne[1] = 5
-	rowOne[2] = 6
-
-	matrixB := NewMatrix(3, 2)
-	browZero := matrixB.GetMatrixRow(0)
-	browZero[0] = 7
-	browZero[1] = 8
-
-	browOne := matrixB.GetMatrixRow(1)
-	browOne[0] = 9
-	browOne[1] = 10
-
-	browTwo := matrixB.GetMatrixRow(2)
-	browTwo[0] = 11
-	browTwo[1] = 12
+	matrixA := NewMatrixFromValues([]float64{1, 2, 3}, []float64{4, 5, 6})
+	matrixB := NewMatrixFromValues([]float64{7, 8}, []float64{9, 10}, []float64{11, 12})
 
 	product, err := matrixA.Multiply(matrixB)
 	require.NoError(t, err)
