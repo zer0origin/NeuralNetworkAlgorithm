@@ -72,11 +72,8 @@ func (a Matrix) DotProduct(b Matrix) (Matrix, error) {
 
 	for r := range rowsInA {
 		for c := range columnInB {
-			row := a.GetMatrixRow(uint32(r))
-			column := b.GetMatrixColumn(uint32(c))
-
 			for n := range columnInA {
-				result[r][c] = result[r][c] + row[n]*column[n]
+				result[r][c] = result[r][c] + a[r][n]*b[n][c]
 			}
 		}
 	}

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -48,14 +47,12 @@ func TestThreeLayerNeural(t *testing.T) {
 
 	product, err := inputHidden.DotProduct(i)
 	require.NoError(t, err)
-	fmt.Printf("Before Sigmoid (product): %.4v\n", product)
 	product.ApplyFunc(Sigmoid)
-	fmt.Printf("After Sigmoid (product): %.4v\n", product)
 
 	dotProduct, err := hiddenOutput.DotProduct(product)
 	require.NoError(t, err)
-	fmt.Printf("Before Sigmoid (dotProduct): %.4v\n", dotProduct)
 	dotProduct.ApplyFunc(Sigmoid)
-	fmt.Printf("After Sigmoid (dotProduct): %.4v\n", dotProduct)
-	fmt.Printf("%.3v\n", dotProduct)
+
+	expected := NewMatrixFromValues([]float64{0.7263033450139793}, []float64{0.7085980724248232}, []float64{0.778097059561142})
+	assert.Equal(t, expected, dotProduct)
 }
