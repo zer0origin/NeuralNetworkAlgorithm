@@ -54,7 +54,7 @@ func (a Matrix) GetMatrixColumnAsMatrix(column uint32) Matrix {
 	return resultArr
 }
 
-func (a Matrix) Multiply(b Matrix) (Matrix, error) {
+func (a Matrix) DotProduct(b Matrix) (Matrix, error) {
 	rowsInA := len(a)
 	columnInA := len(a[0])
 	columnInB := len(b[0])
