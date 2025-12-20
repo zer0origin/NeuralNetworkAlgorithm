@@ -132,7 +132,7 @@ func Sigmoid(x float64) float64 {
 
 func (a Matrix) UpdateWeights(gradientDecent Matrix, learningRate float64) Matrix {
 	return a.ApplyWithIndexes(func(value float64, rows int, columns int) float64 {
-		return value + (learningRate * gradientDecent[rows][columns])
+		return value - (learningRate * gradientDecent[rows][columns])
 	})
 }
 
@@ -156,7 +156,7 @@ func (a Matrix) GradientDescent(errors, output_K, output_J Matrix) Matrix {
 			//OT_J := outputT_J[0][r]
 			//fmt.Printf("Values O^T_%d=%f\n", r, OT_J)
 
-			correction := E_k * O_k * (1 - O_k) * OT_J
+			correction := -E_k * O_k * (1 - O_k) * OT_J
 			DeltaW[r][c] = correction
 
 			//fmt.Printf("Delta W_%d_%d =%.10f\n", r, c, correction)
