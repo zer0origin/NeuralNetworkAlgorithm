@@ -143,7 +143,7 @@ func (a Matrix) GradientDescent(errors, output_K, output_J Matrix) Matrix {
 	DeltaW := NewMatrix(uint32(weightMatrixRows), uint32(weightMatrixColumns))
 	for r := 0; r < weightMatrixRows; r++ { //Destination nodes is determined by the row in matrix multiplication. the notation for M[destination][source].
 		for c := 0; c < weightMatrixColumns; c++ {
-			E_k := errors[r][0] //Destination of nodes is determined by the column in matrix multiplication.
+			E_k := errors[r][0]
 			O_k := output_K[r][0]
 			OT_J := outputT_J[0][c]
 
