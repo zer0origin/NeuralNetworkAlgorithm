@@ -71,7 +71,7 @@ func TestCheckIterationImprovement(t *testing.T) {
 		[]float64{0.6, 0.5, 0.2},
 		[]float64{0.8, 0.1, 0.9})
 
-	for i := 0; i < 1000; i++ {
+	for i := 0; i < 2020; i++ {
 		//Forward Propagation
 		X_hidden, err := W_input_hidden.Multiply(input)
 		require.NoError(t, err)
@@ -96,7 +96,7 @@ func TestCheckIterationImprovement(t *testing.T) {
 		//Calculate decent hidden_output.
 		E_output := TrainingDataExample.ApplyWithIndexes(errorFunction)
 		loss := TrainingDataExample.ApplyWithIndexes(lossFunction).Sum()
-		fmt.Printf("Network Loss: %.10f\n", loss)
+		fmt.Printf("%d: Network Loss: %.10f\n", i, loss)
 		DeltaW_hidden_output := W_hidden_output.GradientDescent(E_output, O_output, O_hidden)
 		updatedW_hidden_output := W_hidden_output.UpdateWeights(DeltaW_hidden_output, learningRate)
 
