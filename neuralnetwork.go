@@ -54,7 +54,7 @@ func (a Matrix) GetMatrixColumnAsMatrix(column uint32) Matrix {
 	return resultArr
 }
 
-func (a Matrix) DotProduct(b Matrix) (Matrix, error) {
+func (a Matrix) Multiply(b Matrix) (Matrix, error) {
 	rowsInA := len(a)
 	columnInA := len(a[0])
 	columnInB := len(b[0])
@@ -128,6 +128,53 @@ func (a Matrix) ApplyWithIndexes(toApply func(value float64, rows int, columns i
 
 func Sigmoid(x float64) float64 {
 	return 1 / (1 + math.Pow(math.E, -x))
+}
+
+func (a Matrix) UpdateWeights(gradientDecent Matrix, learningRate float64) Matrix {
+	return a.ApplyWithIndexes(func(value float64, rows int, columns int) float64 {
+		return value + (learningRate * gradientDecent[rows][columns])
+	})
+}
+
+func (a Matrix) GradientDescent(errors, output_K, output_J Matrix) Matrix {
+	outputT_J := output_J.Transpose()
+	weightMatrixRows := len(a)
+	weightMatrixColumns := len(a[0])
+	DeltaW := NewMatrix(uint32(weightMatrixRows), uint32(weightMatrixColumns))
+	for r := 0; r < weightMatrixRows; r++ {
+		for c := 0; c < weightMatrixColumns; c++ {
+			//fmt.Printf("Calculate W_%d_%d=%.2f corrections\n", r, c, a[r][c])
+
+			E_k := errors[c][0]
+			//fmt.Printf("Values E_%d=%f\n", r, E_k)
+			O_k := output_K[c][0]
+			//fmt.Printf("Values O_%d=%f\n", c, O_k)
+			OT_J := outputT_J[0][r]
+			//fmt.Printf("Values O^T_%d=%f\n", r, OT_J)
+
+			correction := E_k * O_k * (1 - O_k) * OT_J
+			DeltaW[r][c] = correction
+
+			//fmt.Printf("Delta W_%d_%d =%.10f\n", r, c, correction)
+			//fmt.Printf("----------------------\n")
+		}
+	}
+
+	return DeltaW
+}
+
+func (a Matrix) Sum() float64 {
+	weightMatrixRows := len(a)
+	weightMatrixColumns := len(a[0])
+
+	var sum float64 = 0
+	for r := 0; r < weightMatrixRows; r++ {
+		for c := 0; c < weightMatrixColumns; c++ {
+			sum = sum + a[r][c]
+		}
+	}
+
+	return sum
 }
 
 func (a Matrix) Transpose() Matrix {

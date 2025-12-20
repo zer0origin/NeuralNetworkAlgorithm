@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -12,7 +13,7 @@ func TestMatrixProduct(t *testing.T) {
 	matrixA := NewMatrixFromValues([]float64{1, 2, 3}, []float64{4, 5, 6})
 	matrixB := NewMatrixFromValues([]float64{7, 8}, []float64{9, 10}, []float64{11, 12})
 
-	product, err := matrixA.DotProduct(matrixB)
+	product, err := matrixA.Multiply(matrixB)
 	require.NoError(t, err)
 
 	expected := NewMatrixFromValues([]float64{58, 64}, []float64{139, 154})
@@ -25,10 +26,10 @@ func TestThreeLayerNeural(t *testing.T) {
 	W_input_hidden := NewMatrixFromValues([]float64{0.9, 0.3, 0.4}, []float64{0.2, 0.8, 0.2}, []float64{0.1, 0.5, 0.6})
 	W_hidden_output := NewMatrixFromValues([]float64{0.3, 0.7, 0.5}, []float64{0.6, 0.5, 0.2}, []float64{0.8, 0.1, 0.9})
 
-	X_hidden, err := W_input_hidden.DotProduct(input)
+	X_hidden, err := W_input_hidden.Multiply(input)
 	require.NoError(t, err)
 	O_hidden := X_hidden.ApplyFunc(Sigmoid)
-	X_output, err := W_hidden_output.DotProduct(O_hidden)
+	X_output, err := W_hidden_output.Multiply(O_hidden)
 	require.NoError(t, err)
 	O_output := X_output.ApplyFunc(Sigmoid)
 
@@ -55,7 +56,9 @@ func TestBackwardPropConcept(t *testing.T) {
 	fmt.Printf("Sum: -(t-0) * Sigmoid(sumW_jkO_j) * (1-Sigmoid(sumW_jkO_j)) * oj\nCalc:-%.3f * Sigmoid(%.3f) * (1-Sigmoid(%.3f)) * %.3f\n", e1, sumW_jkO_j, sumW_jkO_j, o1)
 }
 
-func TestThreeLayerNeuralBackwardPropagation(t *testing.T) {
+func TestCheckIterationImprovement(t *testing.T) {
+	learningRate := 0.00000000000001
+
 	//weight * input + bias, -->> activation function
 	input := NewMatrixFromValues([]float64{0.9}, []float64{0.1}, []float64{0.8})
 	W_input_hidden := NewMatrixFromValues(
@@ -68,10 +71,66 @@ func TestThreeLayerNeuralBackwardPropagation(t *testing.T) {
 		[]float64{0.6, 0.5, 0.2},
 		[]float64{0.8, 0.1, 0.9})
 
-	X_hidden, err := W_input_hidden.DotProduct(input)
+	for i := 0; i < 1000; i++ {
+		//Forward Propagation
+		X_hidden, err := W_input_hidden.Multiply(input)
+		require.NoError(t, err)
+		O_hidden := X_hidden.ApplyFunc(Sigmoid)
+		X_output, err := W_hidden_output.Multiply(O_hidden)
+		require.NoError(t, err)
+		O_output := X_output.ApplyFunc(Sigmoid)
+
+		errorFunction := func(T float64, rows int, columns int) float64 {
+			return T - O_output[rows][columns]
+		}
+
+		lossFunction := func(T float64, rows int, columns int) float64 {
+			return math.Pow(T-O_output[rows][columns], 2)
+		}
+
+		TrainingDataExample := NewMatrixFromValues(
+			[]float64{0.8},
+			[]float64{0.6},
+			[]float64{0.778097059561142})
+
+		//Calculate decent hidden_output.
+		E_output := TrainingDataExample.ApplyWithIndexes(errorFunction)
+		loss := TrainingDataExample.ApplyWithIndexes(lossFunction).Sum()
+		fmt.Printf("Network Loss: %.10f\n", loss)
+		DeltaW_hidden_output := W_hidden_output.GradientDescent(E_output, O_output, O_hidden)
+		updatedW_hidden_output := W_hidden_output.UpdateWeights(DeltaW_hidden_output, learningRate)
+
+		//Hidden Layer - Calculate Error.
+		E_hidden, err := W_hidden_output.Transpose().Multiply(E_output)
+		require.NoError(t, err)
+
+		//Calculate decent input_hidden.
+		DeltaW_input_hidden := W_input_hidden.GradientDescent(E_hidden, O_hidden, input)
+		updatedW_input_hidden := DeltaW_input_hidden.UpdateWeights(DeltaW_input_hidden, learningRate)
+
+		W_input_hidden = updatedW_input_hidden
+		W_hidden_output = updatedW_hidden_output
+	}
+}
+
+func TestThreeLayerNeuralBackwardPropagation(t *testing.T) {
+	learningRate := 0.00001
+	//weight * input + bias, -->> activation function
+	input := NewMatrixFromValues([]float64{0.9}, []float64{0.1}, []float64{0.8})
+	W_input_hidden := NewMatrixFromValues(
+		[]float64{0.9, 0.3, 0.4},
+		[]float64{0.2, 0.8, 0.2},
+		[]float64{0.1, 0.5, 0.6})
+
+	W_hidden_output := NewMatrixFromValues(
+		[]float64{0.3, 0.7, 0.5},
+		[]float64{0.6, 0.5, 0.2},
+		[]float64{0.8, 0.1, 0.9})
+
+	X_hidden, err := W_input_hidden.Multiply(input)
 	require.NoError(t, err)
 	O_hidden := X_hidden.ApplyFunc(Sigmoid)
-	X_output, err := W_hidden_output.DotProduct(O_hidden)
+	X_output, err := W_hidden_output.Multiply(O_hidden)
 	require.NoError(t, err)
 	O_output := X_output.ApplyFunc(Sigmoid)
 
@@ -82,45 +141,37 @@ func TestThreeLayerNeuralBackwardPropagation(t *testing.T) {
 
 	assert.Equal(t, expected, O_output)
 
-	//Calculate decent.
+	errorFunction := func(value float64, rows int, columns int) float64 {
+		return value - O_output[rows][columns]
+	}
+
 	TrainingDataExample := NewMatrixFromValues(
 		[]float64{0.8},
 		[]float64{0.6},
 		[]float64{0.778097059561142})
-	e := TrainingDataExample.ApplyWithIndexes(func(value float64, rows int, columns int) float64 {
-		return value - O_output[rows][columns]
-	})
-	fmt.Println(e)
 
-	W_hidden_output_rows := len(W_hidden_output)
-	W_hidden_output_columns := len(W_hidden_output[0])
-	DeltaW_hidden_output := NewMatrix(uint32(W_hidden_output_rows), uint32(W_hidden_output_columns))
-	for r := 0; r < W_hidden_output_rows; r++ {
-		for c := 0; c < W_hidden_output_columns; c++ {
-			fmt.Printf("Calculate W_%d_%d=%.2f corrections\n", r, c, W_hidden_output[r][c])
+	//Calculate decent hidden_output.
+	E_output := TrainingDataExample.ApplyWithIndexes(errorFunction)
+	fmt.Println("hidden_output updates")
+	DeltaW_hidden_output := W_hidden_output.GradientDescent(E_output, O_output, O_hidden)
+	updatedW_hidden_output := W_hidden_output.UpdateWeights(DeltaW_hidden_output, learningRate)
 
-			E_k := e[r][0]
-			fmt.Printf("Values E_%d=%f\n", r, E_k)
-			O_k := O_output[c][0]
-			fmt.Printf("Values O_%d=%f\n", c, O_k)
-			OT_J := O_output.Transpose()[0][r]
-			fmt.Printf("Values O^T_%d=%f\n", r, OT_J)
+	fmt.Printf("%.5v\n", W_hidden_output)
+	fmt.Printf("%.5v\n", DeltaW_hidden_output)
+	fmt.Printf("%v\n", updatedW_hidden_output)
 
-			correction := (-E_k) * O_k * (1 - O_k) * OT_J
-			DeltaW_hidden_output[r][c] = correction
+	//Hidden Layer - Calculate Error.
+	E_hidden, err := W_hidden_output.Transpose().Multiply(E_output)
+	require.NoError(t, err)
 
-			fmt.Printf("Delta W_%d_%d =%.10f\n", r, c, correction)
-			fmt.Printf("----------------------\n")
-		}
-	}
+	//Calculate decent input_hidden.
+	fmt.Println("input_hidden updates")
+	DeltaW_input_hidden := W_input_hidden.GradientDescent(E_hidden, O_hidden, input)
+	updatedW_input_hidden := DeltaW_input_hidden.UpdateWeights(DeltaW_input_hidden, learningRate)
 
-	learningRate := 0.1
-	fmt.Println(DeltaW_hidden_output)
-	updatedW_hidden_output := W_hidden_output.ApplyWithIndexes(func(value float64, rows int, columns int) float64 {
-		return value - (learningRate * DeltaW_hidden_output[rows][columns])
-	})
-	fmt.Println(W_hidden_output)
-	fmt.Println(updatedW_hidden_output)
+	fmt.Println(E_hidden)
+	fmt.Printf("%.5v\n", DeltaW_input_hidden)
+	fmt.Printf("%.5v\n", updatedW_input_hidden)
 }
 
 func TestOuterProduct(t *testing.T) {
