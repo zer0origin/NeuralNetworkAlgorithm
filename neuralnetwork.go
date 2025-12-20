@@ -141,4 +141,23 @@ func (a Matrix) Transpose() Matrix {
 	return NewMatrixFromValues(result...)
 }
 
+func (a Matrix) OuterProduct(b Matrix) Matrix {
+	rowsOfA := len(a)
+	rowsOfB := len(b)
+
+	if rowsOfA == 0 || rowsOfB == 0 {
+		return NewMatrix(0, 0)
+	}
+
+	colsOfB := len(b[0])
+	result := NewMatrix(uint32(rowsOfA), uint32(colsOfB))
+	for i := 0; i < rowsOfA; i++ {
+		for j := 0; j < colsOfB; j++ {
+			result[i][j] = a[i][0] * b[0][j]
+		}
+	}
+
+	return result
+}
+
 //https://www.jeremyjordan.me/intro-to-neural-networks/
