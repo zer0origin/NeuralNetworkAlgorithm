@@ -57,7 +57,7 @@ func TestBackwardPropConcept(t *testing.T) {
 }
 
 func TestCheckIterationImprovement(t *testing.T) {
-	learningRate := 0.00000000000001
+	learningRate := 0.1
 
 	//weight * input + bias, -->> activation function
 	input := NewMatrixFromValues([]float64{0.9}, []float64{0.1}, []float64{0.8})
@@ -106,7 +106,7 @@ func TestCheckIterationImprovement(t *testing.T) {
 
 		//Calculate decent input_hidden.
 		DeltaW_input_hidden := W_input_hidden.GradientDescent(E_hidden, O_hidden, input)
-		updatedW_input_hidden := DeltaW_input_hidden.UpdateWeights(DeltaW_input_hidden, learningRate)
+		updatedW_input_hidden := W_input_hidden.UpdateWeights(DeltaW_input_hidden, learningRate)
 
 		W_input_hidden = updatedW_input_hidden
 		W_hidden_output = updatedW_hidden_output
