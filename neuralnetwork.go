@@ -143,24 +143,12 @@ func (a Matrix) GradientDescent(errors, output_K, output_J Matrix) Matrix {
 	DeltaW := NewMatrix(uint32(weightMatrixRows), uint32(weightMatrixColumns))
 	for r := 0; r < weightMatrixRows; r++ {
 		for c := 0; c < weightMatrixColumns; c++ {
-			//fmt.Printf("Calculate W_%d_%d=%.2f corrections\n", r, c, a[r][c])
-
-			E_k := errors[r][0]
+			E_k := errors[r][0] //Destination of nodes is determined by the column in matrix multiplication.
 			O_k := output_K[r][0]
 			OT_J := outputT_J[0][c]
 
-			//E_k := errors[c][0]
-			//fmt.Printf("Values E_%d=%f\n", r, E_k)
-			//O_k := output_K[c][0]
-			//fmt.Printf("Values O_%d=%f\n", c, O_k)
-			//OT_J := outputT_J[0][r]
-			//fmt.Printf("Values O^T_%d=%f\n", r, OT_J)
-
 			correction := -E_k * O_k * (1 - O_k) * OT_J
 			DeltaW[r][c] = correction
-
-			//fmt.Printf("Delta W_%d_%d =%.10f\n", r, c, correction)
-			//fmt.Printf("----------------------\n")
 		}
 	}
 
