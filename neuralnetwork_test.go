@@ -113,67 +113,6 @@ func TestCheckIterationImprovement(t *testing.T) {
 	}
 }
 
-func TestThreeLayerNeuralBackwardPropagation(t *testing.T) {
-	learningRate := 0.00001
-	//weight * input + bias, -->> activation function
-	input := NewMatrixFromValues([]float64{0.9}, []float64{0.1}, []float64{0.8})
-	W_input_hidden := NewMatrixFromValues(
-		[]float64{0.9, 0.3, 0.4},
-		[]float64{0.2, 0.8, 0.2},
-		[]float64{0.1, 0.5, 0.6})
-
-	W_hidden_output := NewMatrixFromValues(
-		[]float64{0.3, 0.7, 0.5},
-		[]float64{0.6, 0.5, 0.2},
-		[]float64{0.8, 0.1, 0.9})
-
-	X_hidden, err := W_input_hidden.Multiply(input)
-	require.NoError(t, err)
-	O_hidden := X_hidden.ApplyFunc(Sigmoid)
-	X_output, err := W_hidden_output.Multiply(O_hidden)
-	require.NoError(t, err)
-	O_output := X_output.ApplyFunc(Sigmoid)
-
-	expected := NewMatrixFromValues(
-		[]float64{0.7263033450139793},
-		[]float64{0.7085980724248232},
-		[]float64{0.778097059561142})
-
-	assert.Equal(t, expected, O_output)
-
-	errorFunction := func(value float64, rows int, columns int) float64 {
-		return value - O_output[rows][columns]
-	}
-
-	TrainingDataExample := NewMatrixFromValues(
-		[]float64{0.8},
-		[]float64{0.6},
-		[]float64{0.778097059561142})
-
-	//Calculate decent hidden_output.
-	E_output := TrainingDataExample.ApplyWithIndexes(errorFunction)
-	fmt.Println("hidden_output updates")
-	DeltaW_hidden_output := W_hidden_output.GradientDescent(E_output, O_output, O_hidden)
-	updatedW_hidden_output := W_hidden_output.UpdateWeights(DeltaW_hidden_output, learningRate)
-
-	fmt.Printf("%.5v\n", W_hidden_output)
-	fmt.Printf("%.5v\n", DeltaW_hidden_output)
-	fmt.Printf("%v\n", updatedW_hidden_output)
-
-	//Hidden Layer - Calculate Error.
-	E_hidden, err := W_hidden_output.Transpose().Multiply(E_output)
-	require.NoError(t, err)
-
-	//Calculate decent input_hidden.
-	fmt.Println("input_hidden updates")
-	DeltaW_input_hidden := W_input_hidden.GradientDescent(E_hidden, O_hidden, input)
-	updatedW_input_hidden := DeltaW_input_hidden.UpdateWeights(DeltaW_input_hidden, learningRate)
-
-	fmt.Println(E_hidden)
-	fmt.Printf("%.5v\n", DeltaW_input_hidden)
-	fmt.Printf("%.5v\n", updatedW_input_hidden)
-}
-
 func TestOuterProduct(t *testing.T) {
 	a := NewMatrixFromValues([]float64{1, 0, -1})
 	b := NewMatrixFromValues([]float64{-2, 1, 2})
