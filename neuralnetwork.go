@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"math"
+	"math/rand"
 )
 
 type Matrix [][]float64
@@ -16,6 +17,19 @@ func NewMatrix(rows uint32, columns uint32) Matrix {
 		for r := range rows {
 			for range columns {
 				zeroArr[r] = append(zeroArr[r], 0)
+			}
+		}
+
+		return zeroArr
+	}()
+}
+
+func NewMatrixFromValueFunction(rows uint32, columns uint32, value func() float64) Matrix {
+	return func() [][]float64 {
+		zeroArr := make([][]float64, rows)
+		for r := range rows {
+			for range columns {
+				zeroArr[r] = append(zeroArr[r], value())
 			}
 		}
 
@@ -70,10 +84,10 @@ func (a Matrix) Multiply(b Matrix) (Matrix, error) {
 
 	result := NewMatrix(uint32(rowsInA), uint32(columnInB))
 
-	for r := range rowsInA {
-		for c := range columnInB {
+	for destination := range rowsInA {
+		for source := range columnInB {
 			for n := range columnInA {
-				result[r][c] = result[r][c] + a[r][n]*b[n][c]
+				result[destination][source] = result[destination][source] + a[destination][n]*b[n][source]
 			}
 		}
 	}
@@ -136,16 +150,22 @@ func (a Matrix) UpdateWeights(gradientDecent Matrix, learningRate float64) Matri
 	})
 }
 
-func (a Matrix) GradientDescent(errors, output_K, output_J Matrix) Matrix {
-	outputT_J := output_J.Transpose()
+func GenerateRandomWeight(links int) float64 {
+	min := -1 / math.Sqrt(float64(links))
+	max := 1 / math.Sqrt(float64(links))
+
+	return min + rand.Float64()*(max-min)
+}
+
+func (a Matrix) GradientDescent(error_K, output_K, output_J Matrix) Matrix {
 	weightMatrixRows := len(a)
 	weightMatrixColumns := len(a[0])
 	DeltaW := NewMatrix(uint32(weightMatrixRows), uint32(weightMatrixColumns))
 	for r := 0; r < weightMatrixRows; r++ { //Destination nodes is determined by the row in matrix multiplication. the notation for M[destination][source].
 		for c := 0; c < weightMatrixColumns; c++ {
-			E_k := errors[r][0]
+			E_k := error_K[r][0]
 			O_k := output_K[r][0]
-			OT_J := outputT_J[0][c]
+			OT_J := output_J[c][0]
 
 			correction := -E_k * O_k * (1 - O_k) * OT_J
 			DeltaW[r][c] = correction

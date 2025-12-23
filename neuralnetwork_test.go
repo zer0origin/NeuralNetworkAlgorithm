@@ -71,7 +71,7 @@ func TestCheckIterationImprovement(t *testing.T) {
 		[]float64{0.6, 0.5, 0.2},
 		[]float64{0.8, 0.1, 0.9})
 
-	for i := 0; i < 2020; i++ {
+	for i := 0; i <= 2020; i++ {
 		//Forward Propagation
 		X_hidden, err := W_input_hidden.Multiply(input)
 		require.NoError(t, err)
@@ -91,25 +91,26 @@ func TestCheckIterationImprovement(t *testing.T) {
 		TrainingDataExample := NewMatrixFromValues(
 			[]float64{0.8},
 			[]float64{0.6},
-			[]float64{0.778097059561142})
+			[]float64{0.7})
 
-		//Calculate decent hidden_output.
+		//Calculate error.
 		E_output := TrainingDataExample.ApplyWithIndexes(errorFunction)
-		loss := TrainingDataExample.ApplyWithIndexes(lossFunction).Sum()
-		fmt.Printf("%d: Network Loss: %.10f\n", i, loss)
-		DeltaW_hidden_output := W_hidden_output.GradientDescent(E_output, O_output, O_hidden)
-		updatedW_hidden_output := W_hidden_output.UpdateWeights(DeltaW_hidden_output, learningRate)
-
-		//Hidden Layer - Calculate Error.
 		E_hidden, err := W_hidden_output.Transpose().Multiply(E_output)
 		require.NoError(t, err)
 
-		//Calculate decent input_hidden.
+		//Update Weights
+		DeltaW_hidden_output := W_hidden_output.GradientDescent(E_output, O_output, O_hidden)
+		updatedW_hidden_output := W_hidden_output.UpdateWeights(DeltaW_hidden_output, learningRate)
+
 		DeltaW_input_hidden := W_input_hidden.GradientDescent(E_hidden, O_hidden, input)
 		updatedW_input_hidden := W_input_hidden.UpdateWeights(DeltaW_input_hidden, learningRate)
 
 		W_input_hidden = updatedW_input_hidden
 		W_hidden_output = updatedW_hidden_output
+
+		//Display loss
+		loss := TrainingDataExample.ApplyWithIndexes(lossFunction).Sum()
+		fmt.Printf("%d: Network Loss: %.10f\n", i, loss)
 	}
 }
 
@@ -120,3 +121,5 @@ func TestOuterProduct(t *testing.T) {
 	result := a.Transpose().OuterProduct(b)
 	fmt.Printf("TestOuterProduct: %.0f\n", result)
 }
+
+// MNIST https://github.com/makeyourownneuralnetwork/makeyourownneuralnetwork/tree/master/mnist_dataset
