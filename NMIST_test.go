@@ -57,7 +57,7 @@ func TestMnistTraining(t *testing.T) {
 		return GenerateRandomWeight(64)
 	})
 
-	learningRate := 0.1 / float64(trainingDatasetSize)
+	learningRate := 0.01
 	fmt.Printf("Learning Rate: %f\n", learningRate)
 
 	for epoch := 0; epoch < 10_000; epoch++ {
@@ -116,10 +116,6 @@ func TestMnistTraining(t *testing.T) {
 				DeltaW_input_hidden := W_input_hidden.GradientDescent(E_Hidden_1, O_hidden_1, inputs)
 				W_input_hidden = W_input_hidden.UpdateWeights(DeltaW_input_hidden, learningRate)
 			})
-
-			if epoch == 10 {
-				learningRate *= 0.1
-			}
 		}
 
 		wg.Wait()
