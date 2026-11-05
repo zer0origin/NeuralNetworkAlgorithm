@@ -8,7 +8,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	th "sync"
+	"sync"
 	"testing"
 )
 
