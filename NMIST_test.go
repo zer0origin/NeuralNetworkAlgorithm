@@ -11,7 +11,7 @@ import (
 	"testing"
 )
 
-//go:embed data/mnist_train_100.csv
+//go:embed data/mnist_train.csv
 var mnist_train string
 
 func loadPreviousData(filename string) (data, error) {
@@ -44,6 +44,8 @@ func TestMnistTraining(t *testing.T) {
 	TestMnistTrainingInputs := strings.Split(mnist_train, "\n")
 	trainingDatasetSize := len(TestMnistTrainingInputs) - 1
 
+	fmt.Printf("Size of dataset: %d", trainingDatasetSize)
+
 	W_input_hidden := NewMatrixFromValueFunction(128, 784, func() float64 {
 		return GenerateRandomWeight(784)
 	})
@@ -54,9 +56,9 @@ func TestMnistTraining(t *testing.T) {
 		return GenerateRandomWeight(64)
 	})
 
-	learningRate := 0.01
+	learningRate := 0.1
 
-	for epoch := 0; epoch < 500; epoch++ {
+	for epoch := 0; epoch < 10_000; epoch++ {
 		totalLoss := 0.0
 
 		for x := 0; x < trainingDatasetSize; x++ {
@@ -113,7 +115,12 @@ func TestMnistTraining(t *testing.T) {
 			W_input_hidden = W_input_hidden.UpdateWeights(DeltaW_input_hidden, learningRate)
 		}
 
-		fmt.Printf("Epoch %d complete. Total Loss: %.4f\n", epoch, totalLoss)
+		if math.IsNaN(totalLoss) {
+			fmt.Println("NAN DETECTED, BREAKING!")
+			break
+		}
+
+		fmt.Printf("Epoch %d complete. Total Loss: %.5f\n", epoch, totalLoss)
 	}
 }
 
