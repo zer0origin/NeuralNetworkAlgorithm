@@ -15,47 +15,43 @@ import (
 //go:embed data/mnist_train.csv
 var mnist_train string
 
-func loadPreviousData(filename string) (data, error) {
-	bytes, err := os.ReadFile(filename)
-	if err != nil {
-		return data{}, err
-	}
-
-	save := &data{}
-	err = json.Unmarshal(bytes, save)
-	if err != nil {
-		return data{}, err
-	}
-
-	return *save, err
-}
-
-type data struct {
-	Loss            float64 `json:"loss"`
-	LearningRate    float64 `json:"learningRate"`
-	W_input_hidden  Matrix  `json:"w_Input_Hidden"`
-	W_hidden_hidden Matrix  `json:"w_Hidden_Hidden"`
-	W_hidden_output Matrix  `json:"w_Hidden_Output"`
-}
-
 func TestMnistTraining(t *testing.T) {
+	loadWeights := true
 	now := time.Now().Unix()
+
+	learningRate := 0.0001
+	var W_input_hidden Matrix
+	var W_hidden_hidden Matrix
+	var W_hidden_output Matrix
+
 	TestMnistTrainingInputs := strings.Split(mnist_train, "\n")
 	trainingDatasetSize := len(TestMnistTrainingInputs) - 1
 
 	fmt.Printf("Size of dataset: %d\n", trainingDatasetSize)
 
-	W_input_hidden := NewMatrixFromValueFunction(128, 784, func() float64 {
-		return GenerateRandomWeight(784)
-	})
-	W_hidden_hidden := NewMatrixFromValueFunction(64, 128, func() float64 {
-		return GenerateRandomWeight(128)
-	})
-	W_hidden_output := NewMatrixFromValueFunction(10, 64, func() float64 {
-		return GenerateRandomWeight(64)
-	})
+	if !loadWeights {
+		W_input_hidden = NewMatrixFromValueFunction(128, 784, func() float64 {
+			return GenerateRandomWeight(784)
+		})
+		W_hidden_hidden = NewMatrixFromValueFunction(64, 128, func() float64 {
+			return GenerateRandomWeight(128)
+		})
+		W_hidden_output = NewMatrixFromValueFunction(10, 64, func() float64 {
+			return GenerateRandomWeight(64)
+		})
+	} else {
+		weights, err := loadPreviousData("1793868743-NeuralWeights.json")
+		if err != nil {
+			panic(err)
+		}
 
-	learningRate := 0.01
+		W_input_hidden = weights.W_input_hidden
+		W_hidden_hidden = weights.W_hidden_hidden
+		W_hidden_output = weights.W_hidden_output
+
+		fmt.Printf("Weights loaded from file! Loss: %.5f\n", weights.Loss)
+	}
+
 	fmt.Printf("Learning Rate: %f\n", learningRate)
 
 	for epoch := 0; epoch < 10_000; epoch++ {

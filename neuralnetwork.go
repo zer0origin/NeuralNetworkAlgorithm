@@ -57,17 +57,6 @@ func (a Matrix) GetMatrixColumn(column uint32) []float64 {
 	return resultArr
 }
 
-func (a Matrix) GetMatrixColumnAsMatrix(column uint32) Matrix {
-	rowLen := len(a)
-	resultArr := make([][]float64, rowLen)
-
-	for x := range rowLen {
-		resultArr[x] = append(resultArr[x], a[x][column])
-	}
-
-	return resultArr
-}
-
 func (a Matrix) Multiply(b Matrix) (Matrix, error) {
 	rowsInA := len(a)
 	columnInA := len(a[0])
