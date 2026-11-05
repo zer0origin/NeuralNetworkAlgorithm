@@ -160,15 +160,24 @@ func GenerateRandomWeight(links int) float64 {
 func (a Matrix) GradientDescent(error_K, output_K, output_J Matrix) Matrix {
 	weightMatrixRows := len(a)
 	weightMatrixColumns := len(a[0])
-	DeltaW := NewMatrix(uint32(weightMatrixRows), uint32(weightMatrixColumns))
-	for r := 0; r < weightMatrixRows; r++ { //Destination nodes is determined by the row in matrix multiplication. the notation for M[destination][source].
-		for c := 0; c < weightMatrixColumns; c++ {
-			E_k := error_K[r][0]
-			O_k := output_K[r][0]
-			OT_J := output_J[c][0]
+	batchSize := len(error_K[0])
 
-			correction := -E_k * O_k * (1 - O_k) * OT_J
-			DeltaW[r][c] = correction
+	DeltaW := NewMatrix(uint32(weightMatrixRows), uint32(weightMatrixColumns))
+
+	for r := 0; r < weightMatrixRows; r++ {
+		for c := 0; c < weightMatrixColumns; c++ {
+			var totalCorrection float64 = 0
+
+			for p := 0; p < batchSize; p++ {
+				E_k := error_K[r][p]
+				O_k := output_K[r][p]
+				OT_J := output_J[c][p]
+
+				correction := -E_k * O_k * (1 - O_k) * OT_J
+				totalCorrection += correction
+			}
+
+			DeltaW[r][c] = totalCorrection / float64(batchSize)
 		}
 	}
 
