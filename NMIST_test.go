@@ -44,7 +44,7 @@ func TestMnistTraining(t *testing.T) {
 	TestMnistTrainingInputs := strings.Split(mnist_train, "\n")
 	trainingDatasetSize := len(TestMnistTrainingInputs) - 1
 
-	fmt.Printf("Size of dataset: %d", trainingDatasetSize)
+	fmt.Printf("Size of dataset: %d\n", trainingDatasetSize)
 
 	W_input_hidden := NewMatrixFromValueFunction(128, 784, func() float64 {
 		return GenerateRandomWeight(784)
