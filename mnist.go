@@ -34,7 +34,7 @@ func calculate(inputs Matrix) Matrix {
 	var W_hidden_hidden Matrix
 	var W_hidden_output Matrix
 
-	weights, err := loadPreviousData("1793868743-NeuralWeights.json")
+	weights, err := loadPreviousData("1793888030-NeuralWeights.json")
 	if err != nil {
 		panic(err)
 	}

@@ -40,7 +40,7 @@ func TestMnistTraining(t *testing.T) {
 			return GenerateRandomWeight(64)
 		})
 	} else {
-		weights, err := loadPreviousData("1793868743-NeuralWeights.json")
+		weights, err := loadPreviousData("1793886262-NeuralWeights.json ")
 		if err != nil {
 			panic(err)
 		}
