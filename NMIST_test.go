@@ -111,16 +111,6 @@ func TestMnistTraining(t *testing.T) {
 
 			DeltaW_input_hidden := W_input_hidden.GradientDescent(E_Hidden_1, O_hidden_1, inputs)
 			W_input_hidden = W_input_hidden.UpdateWeights(DeltaW_input_hidden, learningRate)
-
-			dataToSave = data{
-				Loss:            totalLoss,
-				Inputs:          inputs,
-				LearningRate:    learningRate,
-				W_input_hidden:  W_input_hidden,
-				W_hidden_hidden: W_hidden_hidden,
-				W_hidden_output: W_hidden_output,
-				O_output:        O_output,
-			}
 		}
 
 		fmt.Printf("Epoch %d complete. Total Loss: %.4f\n", epoch, totalLoss)
