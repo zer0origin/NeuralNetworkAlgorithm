@@ -27,4 +27,4 @@ Three
 
 
 ## Future Tasks
-Due to MNIST Training bias, recognition works best when the number is in the center for the grid. 
+Due to MNIST Training bias, recognition works best when the number is in the center of the grid. I need to generate my own images derived from MNIST with shifted image positions.
