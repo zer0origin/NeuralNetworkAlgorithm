@@ -3,6 +3,8 @@
 The project uses Stochastic Gradient Descent and Sigmoid during forward pass & back propagation phases. 
 Couldn't have gotten this far without concepts & explanations from 'Make Your Own Neural Network by Tariq Rashid' (Part one).
 
+The neural network is written using only Go's standard library without external dependencies. 
+
 ## Live Demo
 The canvas on the grid gets translated into a 28 x 28 uint8 array consisting of grayscale values from 0 to 255. This array gets converted to JSON then sent to an local Gin API endpoint. Once the network guesses (around 23ms) the network puts its guess into a 0 - 9 index array.
 
